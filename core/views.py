@@ -2,7 +2,11 @@ from .models import Product, Collection
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import ProductSerializer, CollectionSerializer
+from .serializers import (
+    WriteProductSerializer,
+    ReadProductSerializer,
+    CollectionSerializer,
+)
 from rest_framework import status
 
 # Create your views here.
@@ -12,12 +16,12 @@ from rest_framework import status
 def list_product(request):
     if request.method == "GET":
         queryset = Product.objects.all()
-        serializer = ProductSerializer(queryset, many=True)
+        serializer = ReadProductSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == "POST":
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
+        serializer = WriteProductSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
@@ -26,20 +30,20 @@ def list_product(request):
 def get_product(request, id):
     instance = get_object_or_404(Product, id=id)
     if request.method == "GET":
-        serializer = ProductSerializer(instance)
+        serializer = ReadProductSerializer(instance)
         return Response(serializer.data)
     elif request.method == "PUT":
-        serializer = ProductSerializer(data=request.data, instance=instance)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data)
+        serializer = WriteProductSerializer(data=request.data, instance=instance)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
     elif request.method == "PATCH":
-        serializer = ProductSerializer(
+        serializer = WriteProductSerializer(
             data=request.data, instance=instance, partial=True
         )
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
     elif request.method == "DELETE":
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -54,7 +58,32 @@ def list_collection(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == "POST":
         serializer = CollectionSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view(["GET", "PUT", "PATCH", "DELETE"])
+def get_collection(request, id):
+    instance = get_object_or_404(Collection, pk=id)
+    if request.method == "GET":
+        serializer = CollectionSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == "PUT":
+        serializer = CollectionSerializer(data=request.data, instance=instance)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == "PATCH":
+        serializer = CollectionSerializer(
+            data=request.data, instance=instance, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    elif request.method == "DELETE":
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    else:
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
