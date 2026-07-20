@@ -3,9 +3,14 @@ from .models import Product, Collection
 
 
 class CollectionSerializer(serializers.ModelSerializer):
+    product_count = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Collection
-        fields = ["id", "title"]
+        fields = ["id", "title", "product_count"]
+
+    def get_product_count(self, collection):
+        return collection.products.count()
 
 
 class ReadProductSerializer(serializers.ModelSerializer):

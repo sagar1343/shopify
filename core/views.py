@@ -1,5 +1,6 @@
 from .models import Product, Collection
 from django.shortcuts import get_object_or_404
+from django.db.models import Count
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import (
@@ -7,83 +8,93 @@ from .serializers import (
     ReadProductSerializer,
     CollectionSerializer,
 )
+from rest_framework.views import APIView
 from rest_framework import status
 
 # Create your views here.
+# CBV
 
 
-@api_view(["GET", "POST"])
-def list_product(request):
-    if request.method == "GET":
+class ProductList(APIView):
+    def get(self, request):
         queryset = Product.objects.all()
         serializer = ReadProductSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == "POST":
+
+    def post(self, request):
         serializer = WriteProductSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-@api_view(["GET", "PUT", "PATCH", "DELETE"])
-def get_product(request, id):
-    instance = get_object_or_404(Product, id=id)
-    if request.method == "GET":
+class ProductDetails(APIView):
+    def get_object(self, id):
+        return get_object_or_404(Product, id=id)
+
+    def get(self, request, id):
+        instance = self.get_object(id)
         serializer = ReadProductSerializer(instance)
         return Response(serializer.data)
-    elif request.method == "PUT":
+
+    def put(self, request, id):
+        instance = self.get_object(id)
         serializer = WriteProductSerializer(data=request.data, instance=instance)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-    elif request.method == "PATCH":
+
+    def patch(self, request, id):
+        instance = self.get_object(id)
         serializer = WriteProductSerializer(
             data=request.data, instance=instance, partial=True
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-    elif request.method == "DELETE":
+
+    def delete(self, request, id):
+        instance = self.get_object(id)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-@api_view(["GET", "POST"])
-def list_collection(request):
-    if request.method == "GET":
+class CollectionList(APIView):
+    def get(self, request):
         queryset = Collection.objects.all()
         serializer = CollectionSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == "POST":
+
+    def post(self, request):
         serializer = CollectionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-@api_view(["GET", "PUT", "PATCH", "DELETE"])
-def get_collection(request, id):
-    instance = get_object_or_404(Collection, pk=id)
-    if request.method == "GET":
+class CollectionDetails(APIView):
+    def get(self, request, id):
+        instance = get_object_or_404(Collection, pk=id)
         serializer = CollectionSerializer(instance)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == "PUT":
+        return Response(serializer.data)
+
+    def put(self, request, id):
+        instance = get_object_or_404(Collection, pk=id)
         serializer = CollectionSerializer(data=request.data, instance=instance)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == "PATCH":
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+    def patch(self, request, id):
+        instance = get_object_or_404(Collection, pk=id)
         serializer = CollectionSerializer(
             data=request.data, instance=instance, partial=True
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == "DELETE":
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+
+    def delete(self, request, id):
+        instance = get_object_or_404(Collection, pk=id)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    else:
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
