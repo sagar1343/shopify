@@ -1,35 +1,16 @@
 from .models import Product, Collection
 from .serializers import (
-    WriteProductSerializer,
-    ReadProductSerializer,
+    ProductSerializer,
     CollectionSerializer,
 )
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.viewsets import ModelViewSet
 
 
-class ProductList(ListCreateAPIView):
+class ProductViewset(ModelViewSet):
     queryset = Product.objects.all()
-
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return WriteProductSerializer
-        return ReadProductSerializer
+    serializer_class = ProductSerializer
 
 
-class CollectionList(ListCreateAPIView):
-    queryset = Collection.objects.all()
-    serializer_class = CollectionSerializer
-
-
-class ProductDetails(RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.all()
-
-    def get_serializer_class(self):
-        if self.request.method == "GET":
-            return ReadProductSerializer
-        return WriteProductSerializer
-
-
-class CollectionDetails(RetrieveUpdateDestroyAPIView):
+class CollectionViewset(ModelViewSet):
     queryset = Collection.objects.all()
     serializer_class = CollectionSerializer

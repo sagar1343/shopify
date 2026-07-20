@@ -13,24 +13,7 @@ class CollectionSerializer(serializers.ModelSerializer):
         return collection.products.count()
 
 
-class ReadProductSerializer(serializers.ModelSerializer):
-    collection = CollectionSerializer()
-
-    class Meta:
-        model = Product
-        fields = [
-            "id",
-            "title",
-            "collection",
-            "description",
-            "inventory",
-            "price",
-            "created_at",
-            "updated_at",
-        ]
-
-
-class WriteProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
