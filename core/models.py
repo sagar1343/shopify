@@ -18,6 +18,7 @@ class Product(models.Model):
     collection = models.ForeignKey(
         to=Collection, on_delete=models.CASCADE, related_name="products"
     )
+    image = models.ImageField(upload_to="products", default="image.jpg")
     inventory = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

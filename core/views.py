@@ -1,13 +1,11 @@
 from .models import Product, Collection
-from .serializers import (
-    ProductSerializer,
-    CollectionSerializer,
-)
+from .serializers import ProductSerializer, CollectionSerializer
 from rest_framework.viewsets import ModelViewSet
+from django.db.models import Count
 
 
 class ProductViewset(ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related("collection").all()
     serializer_class = ProductSerializer
 
 
